@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\Rihal_Cinema.props" />
+</Project>
