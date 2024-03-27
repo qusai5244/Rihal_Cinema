@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Rihal_Cinema.Models;
 
 namespace Rihal_Cinema.Data
 {
@@ -8,5 +9,7 @@ namespace Rihal_Cinema.Data
         {
 
         }
+
+        public DbSet<User> Users { get; set; }
     }
 }
