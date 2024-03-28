@@ -9,5 +9,7 @@ namespace Rihal_Cinema.Models
         [MaxLength(20)]
         public string Password { get; set; }
 
+        public ICollection<Memory> Memories { get; set; }
+        public ICollection<Rate> Rates { get; set; }
     }
 }
