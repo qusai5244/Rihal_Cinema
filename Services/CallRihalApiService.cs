@@ -101,7 +101,7 @@ namespace Rihal_Cinema.Services
             if (DateTime.TryParseExact(dateString, format, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out dateTime))
             {
                 // Convert the parsed DateTime value to UTC
-                return dateTime.ToUniversalTime();
+                return dateTime.ToUniversalTime().AddHours(8);
             }
             else
             {
