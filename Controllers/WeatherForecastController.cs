@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Rihal_Cinema.Dtos;
+using Rihal_Cinema.Services.Interfaces;
 
 namespace Rihal_Cinema.Controllers
 {
@@ -12,10 +14,13 @@ namespace Rihal_Cinema.Controllers
     };
 
         private readonly ILogger<WeatherForecastController> _logger;
+        private readonly ICallRihalApiService _rihalApiService;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, ICallRihalApiService rihalApiService)
         {
             _logger = logger;
+            _rihalApiService = rihalApiService;
         }
 
         [HttpGet(Name = "GetWeatherForecast")]
@@ -28,6 +33,21 @@ namespace Rihal_Cinema.Controllers
                 Summary = Summaries[Random.Shared.Next(Summaries.Length)]
             })
             .ToArray();
+        }
+
+        [HttpGet("GetMoviesByIds")]
+        public async Task<IActionResult> GetMoviesByIds()
+        {
+            try
+            {
+                var movieContents = await _rihalApiService.GetMoviesByIdsAsync();
+                return Ok(movieContents);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to fetch movies by IDs");
+                return StatusCode(500, "Failed to fetch movies by IDs");
+            }
         }
     }
 }

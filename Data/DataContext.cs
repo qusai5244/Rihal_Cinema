@@ -1,11 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Rihal_Cinema.Models;
+using Rihal_Cinema.Services.Interfaces;
 using System.Diagnostics.Metrics;
 
 namespace Rihal_Cinema.Data
 {
     public class DataContext : DbContext
     {
+        private readonly ICallRihalApiService _callRihalApiService;
+
         public DataContext(DbContextOptions<DataContext> options) : base(options)
         {
 
@@ -55,7 +59,10 @@ namespace Rihal_Cinema.Data
             .WithMany(g => g.MainCasts)
             .HasForeignKey(s => s.MovieId)
             .IsRequired();
+
         }
+
+
     }
 
 
