@@ -1,8 +1,17 @@
 using Microsoft.EntityFrameworkCore;
 
 using Rihal_Cinema.Data;
+using Rihal_Cinema.Helpers;
+using Rihal_Cinema.Services;
+using Rihal_Cinema.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add HttpClient
+builder.Services.AddHttpClient();
+
+builder.Services.AddScoped<ICallRihalApiService, CallRihalApiService>();
+
 
 builder.Services.AddDbContext<DataContext>(options =>
 {
@@ -26,6 +35,11 @@ using (var scope = app.Services.CreateScope())
     {
         var context = services.GetRequiredService<DataContext>();
         context.Database.Migrate();
+
+        // Call the service to get movie data and seed the database
+        var callRihalApiService = services.GetRequiredService<ICallRihalApiService>();
+        var seeder = new DatabaseSeeder(context, callRihalApiService);
+        await seeder.SeedAsync();
     }
     catch (Exception ex)
     {
