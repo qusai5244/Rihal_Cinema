@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "0DSJHfWp2bmr9uANRKGn3zuc45dGppJrGxTi8T3bWFIK8TDMkJwrgu15KyWojNLwf2Rc4Ty4k7FjA2Q0GMkKpQ==",
+  "dgSpecHash": "N50In0hnB65kujIRPFGuiV3AHT+UuwuHZt0oeayqa4a0IIMFyePg5GOtzb0y6D8Qxeqosfbs6WP9Lwt0qPTeCQ==",
   "success": true,
   "projectFilePath": "C:\\Users\\QUSAI\\Desktop\\Files\\Dotnet\\Rihal_Cinema\\Rihal_Cinema.csproj",
   "expectedPackageFiles": [
@@ -25,6 +25,7 @@
     "C:\\Users\\QUSAI\\.nuget\\packages\\microsoft.openapi\\1.2.3\\microsoft.openapi.1.2.3.nupkg.sha512",
     "C:\\Users\\QUSAI\\.nuget\\packages\\microsoft.visualstudio.azure.containers.tools.targets\\1.19.4\\microsoft.visualstudio.azure.containers.tools.targets.1.19.4.nupkg.sha512",
     "C:\\Users\\QUSAI\\.nuget\\packages\\mono.texttemplating\\2.2.1\\mono.texttemplating.2.2.1.nupkg.sha512",
+    "C:\\Users\\QUSAI\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512",
     "C:\\Users\\QUSAI\\.nuget\\packages\\npgsql\\7.0.6\\npgsql.7.0.6.nupkg.sha512",
     "C:\\Users\\QUSAI\\.nuget\\packages\\npgsql.entityframeworkcore.postgresql\\7.0.11\\npgsql.entityframeworkcore.postgresql.7.0.11.nupkg.sha512",
     "C:\\Users\\QUSAI\\.nuget\\packages\\swashbuckle.aspnetcore\\6.5.0\\swashbuckle.aspnetcore.6.5.0.nupkg.sha512",
