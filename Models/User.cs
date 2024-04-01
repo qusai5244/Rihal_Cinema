@@ -6,8 +6,8 @@ namespace Rihal_Cinema.Models
     {
         [MaxLength(50)]
         public string Email { get; set; }
-        [MaxLength(20)]
-        public string Password { get; set; }
+        [MaxLength(50)]
+        public byte[] Password { get; set; }
 
         public ICollection<Memory> Memories { get; set; }
         public ICollection<Rate> Rates { get; set; }
