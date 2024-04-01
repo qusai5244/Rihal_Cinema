@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Rihal_Cinema.Dtos.Users
+namespace Rihal_Cinema.Dtos.User
 {
     public class UserRegisterInputDto
     {
