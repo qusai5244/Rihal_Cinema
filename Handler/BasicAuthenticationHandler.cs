@@ -6,19 +6,23 @@ using System.Text.Encodings.Web;
 using System.Text;
 using System.Threading.Tasks;
 using System.Net.Http.Headers;
+using Rihal_Cinema.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Rihal_Cinema.Handler
 {
     public class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
+        private readonly DataContext _dataContext;
         public BasicAuthenticationHandler(
             IOptionsMonitor<AuthenticationSchemeOptions> options,
             ILoggerFactory loggerFactory,
             UrlEncoder encoder,
-            ISystemClock clock)
+            ISystemClock clock,
+            DataContext dataContext)
             : base(options, loggerFactory, encoder, clock)
         {
-
+            _dataContext = dataContext;
         }
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -36,24 +40,27 @@ namespace Rihal_Cinema.Handler
                 string username = credentials[0];
                 string password = credentials[1];
 
-                // Your authentication logic here, for demonstration, let's check for a hardcoded credential
-                if (username == "admin" && password == "password")
-                {
-                    var claims = new[] {
-                    new Claim(ClaimTypes.Name, username),
-                    new Claim("id", "1")
-                    };
+                var user = await _dataContext
+                                 .Users
+                                 .Where(u=> u.Email == username)
+                                 .FirstOrDefaultAsync();
 
-                    var identity = new ClaimsIdentity(claims, Scheme.Name);
-                    var principal = new ClaimsPrincipal(identity);
-                    var ticket = new AuthenticationTicket(principal, Scheme.Name);
-
-                    return AuthenticateResult.Success(ticket);
-                }
-                else
+                if (user is null || user.Password != password) 
                 {
                     return AuthenticateResult.Fail("Invalid username or password");
                 }
+
+                var claims = new[] {
+                new Claim(ClaimTypes.Name, username),
+                new Claim("id", user.Id.ToString())
+                };
+
+                var identity = new ClaimsIdentity(claims, Scheme.Name);
+                var principal = new ClaimsPrincipal(identity);
+                var ticket = new AuthenticationTicket(principal, Scheme.Name);
+
+                return AuthenticateResult.Success(ticket);
+
             }
             catch
             {

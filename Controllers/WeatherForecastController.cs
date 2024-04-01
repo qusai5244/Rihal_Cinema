@@ -52,7 +52,7 @@ namespace Rihal_Cinema.Controllers
             }
         }
 
-        [HttpGet("username")] // Endpoint to get the username
+        [HttpGet("username")]
         public IActionResult GetUserId()
         {
             // Get the authenticated user's ID from claims
