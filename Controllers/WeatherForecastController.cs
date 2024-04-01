@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Rihal_Cinema.Dtos;
 using Rihal_Cinema.Services.Interfaces;
 
 namespace Rihal_Cinema.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
@@ -48,6 +50,20 @@ namespace Rihal_Cinema.Controllers
                 _logger.LogError(ex, "Failed to fetch movies by IDs");
                 return StatusCode(500, "Failed to fetch movies by IDs");
             }
+        }
+
+        [HttpGet("username")]
+        public IActionResult GetUserId()
+        {
+            // Get the authenticated user's ID from claims
+            var id = User.FindFirst("id")?.Value;
+
+            if (string.IsNullOrEmpty(id))
+            {
+                return NotFound(); // Return 404 if ID is not found
+            }
+
+            return Ok(id); // Return the ID as response
         }
     }
 }
