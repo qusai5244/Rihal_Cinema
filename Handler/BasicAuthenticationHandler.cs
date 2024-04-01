@@ -45,7 +45,9 @@ namespace Rihal_Cinema.Handler
                                  .Where(u=> u.Email == username)
                                  .FirstOrDefaultAsync();
 
-                if (user is null || user.Password != password) 
+                var decodedPassword = Encoding.UTF8.GetString(user.Password);
+
+                if (user is null || decodedPassword != password) 
                 {
                     return AuthenticateResult.Fail("Invalid username or password");
                 }
