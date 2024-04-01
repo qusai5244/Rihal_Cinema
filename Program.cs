@@ -11,6 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHttpClient();
 
 builder.Services.AddScoped<ICallRihalApiService, CallRihalApiService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 
 builder.Services.AddDbContext<DataContext>(options =>

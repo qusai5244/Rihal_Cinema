@@ -52,3 +52,5 @@ C:\Users\QUSAI\Desktop\Files\Dotnet\Rihal_Cinema\bin\Debug\net6.0\System.CodeDom
 C:\Users\QUSAI\Desktop\Files\Dotnet\Rihal_Cinema\bin\Debug\net6.0\System.Text.Encodings.Web.dll
 C:\Users\QUSAI\Desktop\Files\Dotnet\Rihal_Cinema\bin\Debug\net6.0\System.Text.Json.dll
 C:\Users\QUSAI\Desktop\Files\Dotnet\Rihal_Cinema\bin\Debug\net6.0\runtimes\browser\lib\net6.0\System.Text.Encodings.Web.dll
+C:\Users\QUSAI\Desktop\Files\Dotnet\Rihal_Cinema\bin\Debug\net6.0\Data\movies.json
+C:\Users\QUSAI\Desktop\Files\Dotnet\Rihal_Cinema\bin\Debug\net6.0\Newtonsoft.Json.dll

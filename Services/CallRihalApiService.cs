@@ -94,6 +94,7 @@ namespace Rihal_Cinema.Services
 
         }
 
+        //TODO : Check this
         private static DateTime ParseDateString(string dateString)
         {
             string format = "dd-MM-yyyy";
