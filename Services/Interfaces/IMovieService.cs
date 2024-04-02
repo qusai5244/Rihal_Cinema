@@ -6,6 +6,10 @@ namespace Rihal_Cinema.Services.Interfaces
 {
     public interface IMovieService
     {
-        Task<ApiResponse<PaginatedList<MoviesOutputDto>>> GetMovies(SearchAndPaginationInputDto input);
+        Task<ApiResponse<MovieOutputDto>> GetMovie(int id);
+        Task<ApiResponse<PaginatedList<MoviesOutputDto>>> GetMovies(PaginationInputDto input);
+        Task<ApiResponse<List<Top5RatedMoviesOutputDto>>> GetMyTopFiveRatedMovies(int userId);
+        Task<ApiResponse<PaginatedList<MoviesSearchOutputDto>>> MoviesSearch(string searchInput, PaginationInputDto input);
+        Task<ApiResponse<MovieRateDto>> RateMovie(int userId, MovieRateDto input);
     }
 }
