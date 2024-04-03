@@ -1,5 +1,5 @@
 ﻿using Rihal_Cinema.Data;
-using Rihal_Cinema.Dtos.Users;
+using Rihal_Cinema.Dtos.User;
 using Rihal_Cinema.Enums;
 using Rihal_Cinema.Helpers;
 using Rihal_Cinema.Models;

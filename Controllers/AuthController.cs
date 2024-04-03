@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Rihal_Cinema.Dtos.Users;
+using Rihal_Cinema.Dtos.User;
 using Rihal_Cinema.Services.Interfaces;
 
 namespace Rihal_Cinema.Controllers
@@ -16,7 +16,7 @@ namespace Rihal_Cinema.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> CreateUser(UserRegisterInputDto input)
+        public async Task<IActionResult> CreateUser([FromBody]UserRegisterInputDto input)
         {
             if (!ModelState.IsValid)
             {
