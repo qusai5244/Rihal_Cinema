@@ -259,6 +259,89 @@ namespace Rihal_Cinema.Services
                 return new ApiResponse<List<Top5RatedMoviesOutputDto>>(false, (int)ResponseCodeEnum.InternalServerError, "An Error Occurred While getting Top 5 Rated Movies", null);
             }
         }
+
+        public async Task<ApiResponse<ScrambledMoviePuzzleOutputDto>> GuessTheMovie(string scrambledName)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(scrambledName))
+                {
+                    return new ApiResponse<ScrambledMoviePuzzleOutputDto>(false, (int)ResponseCodeEnum.BadRequest, "Scrambled Name Input cannot be empty", null);
+                }
+
+                var movies = await _dataContext.Movies.AsNoTracking().ToListAsync();
+
+                var guessedMovie = movies.FirstOrDefault(m => MatchScrambledNameWithActualName(scrambledName, m.Name));
+
+                if (guessedMovie == null)
+                {
+                    return new ApiResponse<ScrambledMoviePuzzleOutputDto>(false, (int)ResponseCodeEnum.NotFound, "No Movie matched the scrambled name", null);
+                }
+
+                var guessedMovieDto = new ScrambledMoviePuzzleOutputDto
+                {
+                    Id = guessedMovie.Id,
+                    Name = guessedMovie.Name,
+                    Description = guessedMovie.Description
+                };
+
+                return new ApiResponse<ScrambledMoviePuzzleOutputDto>(true, (int)ResponseCodeEnum.Success, "Movie matched", guessedMovieDto);
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse<ScrambledMoviePuzzleOutputDto>(false, (int)ResponseCodeEnum.InternalServerError, "An error occurred while getting movie", null);
+            }
+        }
+
+        public async Task<ApiResponse<List<CompareMoviesRatingsOutputDto>>> RatingsCompare(int userId)
+        {
+            try
+            {
+                var ratings = await _dataContext
+                                    .Rates
+                                    .AsNoTracking()
+                                    .Where(r => r.UserId == userId)
+                                    .ToListAsync();
+
+                if (!ratings.Any())
+                {
+                    return new ApiResponse<List<CompareMoviesRatingsOutputDto>>(false, (int)ResponseCodeEnum.NotFound, "No Ratings Found for This User", null);
+                }
+
+                var ratingsMovieIds = ratings.Select(r => r.MovieId).ToList();
+
+                var movies = await _dataContext
+                                   .Movies
+                                   .AsNoTracking()
+                                   .Where(m => ratingsMovieIds.Contains(m.Id))
+                                   .ToListAsync();
+
+                List<CompareMoviesRatingsOutputDto> compareMoviesRatingsOutputDto = new List<CompareMoviesRatingsOutputDto>();
+
+                foreach (var movie in movies)
+                {
+                    var userMovieRate = ratings.Where(r => r.MovieId == movie.Id).Select(r => r.Value).FirstOrDefault(); // User Rate
+                    var movieAverageRates = (ratings.Where(r => r.MovieId == movie.Id).Select(r => r.Value)).Average();
+
+                    var output = new CompareMoviesRatingsOutputDto
+                    {
+                        Id = movie.Id,
+                        Name = movie.Name,
+                        Rating = userMovieRate,
+                        IsMaximum = userMovieRate >= movieAverageRates ? true : false,
+                    };
+
+                    compareMoviesRatingsOutputDto.Add(output);
+                }
+
+                return new ApiResponse<List<CompareMoviesRatingsOutputDto>>(true, (int)ResponseCodeEnum.Success, "Compare Ratings Retrieved", compareMoviesRatingsOutputDto);
+
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse<List<CompareMoviesRatingsOutputDto>>(false, (int)ResponseCodeEnum.InternalServerError, "An Error Occurred while Compare Ratings", null);
+            }
+        }
         private decimal? CalculateAverageRating(List<Rate> rates, int movieId)
         {
             var ratings = rates.Where(r => r.MovieId == movieId).Select(r => r.Value);
@@ -337,6 +420,31 @@ namespace Rihal_Cinema.Services
 
             return result;
         }
+
+        private bool MatchScrambledNameWithActualName(string scrambledName, string movieName)
+        {
+            // Remove spaces from scrambledName and movieName
+            scrambledName = RemoveSpaces(scrambledName);
+            movieName = RemoveSpaces(movieName);
+
+            char[] scrambledNameChars = scrambledName.ToLower().ToCharArray();
+            char[] movieNameChars = movieName.ToLower().ToCharArray();
+
+            Array.Sort(scrambledNameChars);
+            Array.Sort(movieNameChars);
+
+            return new string(scrambledNameChars) == new string(movieNameChars);
+        }
+
+        private string RemoveSpaces(string str)
+        {
+            // Split the string into words
+            string[] words = str.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            // Concatenate the words without spaces
+            return string.Join("", words);
+        }
+
+
 
     }
 }

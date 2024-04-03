@@ -67,5 +67,25 @@ namespace Rihal_Cinema.Controllers
 
             return Ok(response);
         }
+
+        [HttpGet("guessMovie")]
+        public async Task<IActionResult> GuessTheMovie([FromQuery][Required] string scrambledName)
+        {
+            var response = await _movieService.GuessTheMovie(scrambledName);
+
+            return Ok(response);
+        }
+
+
+        [HttpGet("RatingsCompare")]
+        public async Task<IActionResult> RatingsCompare()
+        {
+            var userIdClaim = User.FindFirst("id");
+            _ = int.TryParse(userIdClaim.Value, out int userId);
+
+            var response = await _movieService.RatingsCompare(userId);
+
+            return Ok(response);
+        }
     }
 }
