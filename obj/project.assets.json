@@ -1636,19 +1636,24 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\QUSAI\\.nuget\\packages\\": {}
+    "C:\\Users\\qalna.QUSAIALNAABI\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\QUSAI\\Desktop\\Files\\Dotnet\\Rihal_Cinema\\Rihal_Cinema.csproj",
+      "projectUniqueName": "C:\\Users\\qalna.QUSAIALNAABI\\Desktop\\Files\\dotenet core\\Rihal_Cinema\\Rihal_Cinema.csproj",
       "projectName": "Rihal_Cinema",
-      "projectPath": "C:\\Users\\QUSAI\\Desktop\\Files\\Dotnet\\Rihal_Cinema\\Rihal_Cinema.csproj",
-      "packagesPath": "C:\\Users\\QUSAI\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\QUSAI\\Desktop\\Files\\Dotnet\\Rihal_Cinema\\obj\\",
+      "projectPath": "C:\\Users\\qalna.QUSAIALNAABI\\Desktop\\Files\\dotenet core\\Rihal_Cinema\\Rihal_Cinema.csproj",
+      "packagesPath": "C:\\Users\\qalna.QUSAIALNAABI\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\qalna.QUSAIALNAABI\\Desktop\\Files\\dotenet core\\Rihal_Cinema\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "C:\\Users\\QUSAI\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\qalna.QUSAIALNAABI\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
