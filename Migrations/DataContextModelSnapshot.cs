@@ -146,6 +146,9 @@ namespace Rihal_Cinema.Migrations
                     b.Property<decimal>("Size")
                         .HasColumnType("numeric");
 
+                    b.Property<string>("StoredName")
+                        .HasColumnType("text");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 

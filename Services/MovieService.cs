@@ -2,9 +2,11 @@
 using Rihal_Cinema.Data;
 using Rihal_Cinema.Dtos;
 using Rihal_Cinema.Dtos.Movie;
+using Rihal_Cinema.Dtos.StarSystem;
 using Rihal_Cinema.Dtos.User;
 using Rihal_Cinema.Enums;
 using Rihal_Cinema.Helpers;
+using Rihal_Cinema.Infrastructure.ServiceContext;
 using Rihal_Cinema.Models;
 using Rihal_Cinema.Services.Interfaces;
 using System.Linq;
@@ -14,6 +16,7 @@ namespace Rihal_Cinema.Services
     public class MovieService : IMovieService
     {
         private readonly DataContext _dataContext;
+        public RequestHeaderContent Header { get; set; }
 
         public MovieService(DataContext dataContext)
         {
@@ -57,7 +60,8 @@ namespace Rihal_Cinema.Services
 
                 foreach (var movie in movies)
                 {
-                    movie.AverageRating = CalculateAverageRating(rates, movie.Id);
+                    var avgRate = CalculateAverageRating(rates, movie.Id);
+                    movie.AverageRating = avgRate == null ? null : (int)Math.Round((decimal)avgRate);
                     movie.Description = TruncateDescription(movie.Description);
                 }
 
@@ -65,20 +69,20 @@ namespace Rihal_Cinema.Services
 
                 return new ApiResponse<PaginatedList<MoviesOutputDto>>(true, (int)ResponseCodeEnum.Success, "Movies Retrieved successfully", pagintaedList);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return new ApiResponse<PaginatedList<MoviesOutputDto>>(false, (int)ResponseCodeEnum.InternalServerError, "An Issue Occurred While Getting Movies Data", null);
             }
         }
 
-        public async Task<ApiResponse<MovieRateDto>> RateMovie(int userId, MovieRateDto input)
+        public async Task<ApiResponse<MovieRateDto>> RateMovie(MovieRateDto input)
         {
             try
             {
 
                 var previousRating = await _dataContext
                            .Rates
-                           .Where(r => r.UserId == userId && r.MovieId == input.MovieId)
+                           .Where(r => r.UserId == Header.UserId && r.MovieId == input.MovieId)
                            .FirstOrDefaultAsync();
 
                 if (previousRating != null)
@@ -90,6 +94,7 @@ namespace Rihal_Cinema.Services
                     }
 
                     previousRating.Value = input.Rate;
+                    previousRating.UpdatedAt= DateTime.UtcNow;
                     await _dataContext.SaveChangesAsync();
                     return new ApiResponse<MovieRateDto>(true, (int)ResponseCodeEnum.Success, "This movie have been rated before, The Rate has updated Successfully", input);
 
@@ -98,7 +103,7 @@ namespace Rihal_Cinema.Services
                 var user = await _dataContext
                                  .Users
                                  .AsNoTracking()
-                                 .Where(u => u.Id == userId)
+                                 .Where(u => u.Id == Header.UserId)
                                  .FirstOrDefaultAsync();
 
                 if (user == null)
@@ -121,7 +126,7 @@ namespace Rihal_Cinema.Services
 
                 var newRate = new Rate
                 {
-                    UserId = userId,
+                    UserId = Header.UserId,
                     MovieId = input.MovieId,
                     Value = input.Rate
                 };
@@ -132,7 +137,7 @@ namespace Rihal_Cinema.Services
                 return new ApiResponse<MovieRateDto>(true, (int)ResponseCodeEnum.Success, "Rate Added Successfully", input);
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return new ApiResponse<MovieRateDto>(false, (int)ResponseCodeEnum.InternalServerError, " An Error Occurred While Adding Rating Movie", null);
             }
@@ -156,7 +161,20 @@ namespace Rihal_Cinema.Services
 
                 List<string> mainCasts = movie.MainCasts.Select(m => m.Name).ToList();
 
-                var x = movie.ReleaseDate?.ToString("dd-MM-yyyy");
+                var rates = await _dataContext
+                                  .Rates
+                                  .AsNoTracking()
+                                  .Where(m => m.MovieId == id)
+                                  .ToListAsync();
+                double? averageRating = null;
+                int? myRate = null;
+
+                if (rates.Any())
+                {
+                    averageRating = rates.Select(r => r.Value).Average();
+                    myRate = rates.Where(r => r.UserId == Header.UserId).Select(r => r.Value).FirstOrDefault();
+                }
+
 
                 var movieDto = new MovieOutputDto
                 {
@@ -166,13 +184,15 @@ namespace Rihal_Cinema.Services
                     MainCasts = mainCasts,
                     ReleaseDate = movie.ReleaseDate?.ToString("dd-MM-yyyy"),
                     Director = movie.Director != null ? movie.Director : null,
-                    Budget = movie.Budget != null ? NumberToText((int)movie.Budget) : null
+                    Budget = movie.Budget != null ? NumberToText((int)movie.Budget) : null,
+                    MyRate = myRate,
+                    AverageRating = averageRating
                 };
 
                 return new ApiResponse<MovieOutputDto>(true, (int)ResponseCodeEnum.Success, "Movie Data Retrieved", movieDto);
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return new ApiResponse<MovieOutputDto>(false, (int)ResponseCodeEnum.InternalServerError, "An Error Occurred while getting Movie data", null);
             }
@@ -187,6 +207,8 @@ namespace Rihal_Cinema.Services
                     return new ApiResponse<PaginatedList<MoviesSearchOutputDto>> (false, (int)ResponseCodeEnum.BadRequest, "Search Input can not be Empty", null);
                 }
 
+                searchInput = searchInput.ToLower();
+
                 var page = paginationInput.Page > 0 ? paginationInput.Page : 1;
                 var pageSize = paginationInput.PageSize > 0 ? paginationInput.PageSize : 10;
 
@@ -194,7 +216,7 @@ namespace Rihal_Cinema.Services
                                    .Movies
                                    .AsNoTracking()
                                    .AsQueryable()
-                                   .Where(m => m.Name.Contains(searchInput) || m.Description.Contains(searchInput));
+                                   .Where(m => m.Name.ToLower().Contains(searchInput) || m.Description.ToLower().Contains(searchInput));
 
                 var moviesCount = await moviesQuery.CountAsync();
 
@@ -220,13 +242,13 @@ namespace Rihal_Cinema.Services
                 return new ApiResponse<PaginatedList<MoviesSearchOutputDto>>(true, (int)ResponseCodeEnum.Success, "Movies Were Found That Contain the Search Input", pagintaedList);
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return new ApiResponse<PaginatedList<MoviesSearchOutputDto>>(false, (int)ResponseCodeEnum.InternalServerError, "An Issue Occurred While Getting Movies Data", null);
             }
         }
 
-        public async Task<ApiResponse<List<Top5RatedMoviesOutputDto>>> GetMyTopFiveRatedMovies(int userId)
+        public async Task<ApiResponse<List<Top5RatedMoviesOutputDto>>> GetMyTopFiveRatedMovies()
         {
             try
             {
@@ -234,7 +256,7 @@ namespace Rihal_Cinema.Services
                                   .Rates
                                   .Include(r => r.Movie)
                                   .AsNoTracking()
-                                  .Where(r => r.UserId == userId)
+                                  .Where(r => r.UserId == Header.UserId)
                                   .OrderByDescending(r => r.Value)
                                   .Take(5)
                                   .Select(r => new Top5RatedMoviesOutputDto
@@ -254,7 +276,7 @@ namespace Rihal_Cinema.Services
 
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return new ApiResponse<List<Top5RatedMoviesOutputDto>>(false, (int)ResponseCodeEnum.InternalServerError, "An Error Occurred While getting Top 5 Rated Movies", null);
             }
@@ -287,41 +309,48 @@ namespace Rihal_Cinema.Services
 
                 return new ApiResponse<ScrambledMoviePuzzleOutputDto>(true, (int)ResponseCodeEnum.Success, "Movie matched", guessedMovieDto);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return new ApiResponse<ScrambledMoviePuzzleOutputDto>(false, (int)ResponseCodeEnum.InternalServerError, "An error occurred while getting movie", null);
             }
         }
 
-        public async Task<ApiResponse<List<CompareMoviesRatingsOutputDto>>> RatingsCompare(int userId)
+        public async Task<ApiResponse<List<CompareMoviesRatingsOutputDto>>> RatingsCompare()
         {
             try
             {
-                var ratings = await _dataContext
+                // Get Movies i have rated
+                var myRatings = await _dataContext
                                     .Rates
                                     .AsNoTracking()
-                                    .Where(r => r.UserId == userId)
+                                    .Where(r => r.UserId == Header.UserId)
                                     .ToListAsync();
 
-                if (!ratings.Any())
+                if (!myRatings.Any())
                 {
                     return new ApiResponse<List<CompareMoviesRatingsOutputDto>>(false, (int)ResponseCodeEnum.NotFound, "No Ratings Found for This User", null);
                 }
 
-                var ratingsMovieIds = ratings.Select(r => r.MovieId).ToList();
+                var ratingsMovieIds = myRatings.Select(r => r.MovieId).ToList();
 
                 var movies = await _dataContext
                                    .Movies
+                                   .Include(m => m.Rates)
                                    .AsNoTracking()
                                    .Where(m => ratingsMovieIds.Contains(m.Id))
                                    .ToListAsync();
+
+                var rates = movies.SelectMany(r => r.Rates);
+
+
 
                 List<CompareMoviesRatingsOutputDto> compareMoviesRatingsOutputDto = new List<CompareMoviesRatingsOutputDto>();
 
                 foreach (var movie in movies)
                 {
-                    var userMovieRate = ratings.Where(r => r.MovieId == movie.Id).Select(r => r.Value).FirstOrDefault(); // User Rate
-                    var movieAverageRates = (ratings.Where(r => r.MovieId == movie.Id).Select(r => r.Value)).Average();
+                    var userMovieRate = myRatings.Where(r => r.MovieId == movie.Id).Select(r => r.Value).FirstOrDefault(); // User Rate
+                    var movieRates = (rates.Where(r => r.MovieId == movie.Id).Select(r => r.Value)).ToList();
+                    var movieAverageRates = movieRates.Sum() / movieRates.Count;
 
                     var output = new CompareMoviesRatingsOutputDto
                     {
@@ -337,12 +366,106 @@ namespace Rihal_Cinema.Services
                 return new ApiResponse<List<CompareMoviesRatingsOutputDto>>(true, (int)ResponseCodeEnum.Success, "Compare Ratings Retrieved", compareMoviesRatingsOutputDto);
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return new ApiResponse<List<CompareMoviesRatingsOutputDto>>(false, (int)ResponseCodeEnum.InternalServerError, "An Error Occurred while Compare Ratings", null);
             }
         }
-        private decimal? CalculateAverageRating(List<Rate> rates, int movieId)
+
+        public async Task<ApiResponse<StarSystemoutputDto>> StarSystem(List<int> input)
+        {
+            try
+            {
+                if (input == null || input.Count == 0)
+                {
+                    return new ApiResponse<StarSystemoutputDto>(false, (int)ResponseCodeEnum.BadRequest, "movie Ids List Can Not Be Empty",null);
+                };
+
+
+                List<int> moviesRates = new List<int>();
+                var movies = await _dataContext
+                                   .Movies
+                                   .AsNoTracking()
+                                   .Where(m => input.Contains(m.Id))
+                                   .ToListAsync();
+
+                if (!movies.Any())
+                {
+                    return new ApiResponse<StarSystemoutputDto>(false, (int)ResponseCodeEnum.NotFound, "movies Not Found", null);
+                }
+
+                var rates = await _dataContext
+                                .Rates
+                                .AsNoTracking()
+                                .Where(r => input.Contains(r.MovieId))
+                                .ToListAsync();
+
+                if (!rates.Any())
+                {
+                    return new ApiResponse<StarSystemoutputDto>(false, (int)ResponseCodeEnum.NotFound, "rates Not Found", null);
+                }
+
+                List<int> averageRatsList = new List<int>();
+
+                foreach (var movie in movies)
+                {
+                    var rate = CalculateAverageRating(rates, movie.Id);
+                    var intRate = (int)Math.Round((decimal)rate);
+                    averageRatsList.Add(intRate);
+                    if(rate == null)
+                    {
+                        moviesRates.Add(0);
+                    }
+                    else
+                    {
+                        moviesRates.Add(intRate);
+                    }
+                }
+
+                var minimumStars = moviesRates.Count;
+
+                // Iterate through the list and print out each element
+                for (int i = 0; i < moviesRates.Count; i++)
+                {
+                    if (i == 0 && moviesRates[i] > moviesRates[i + 1])
+                    {
+                        minimumStars++;
+                    }
+                    else if (i == moviesRates.Count - 1 && moviesRates[i] > moviesRates[i - 1])
+                    {
+                        minimumStars++;
+                    }
+                    else if (i > 0 && i < moviesRates.Count - 1)
+                    {
+                        if (moviesRates[i] > moviesRates[i - 1])
+                        {
+                            minimumStars++;
+                        }
+
+                        if (moviesRates[i] > moviesRates[i + 1])
+                        {
+                            minimumStars++;
+                        }
+                    }
+                }
+
+                var starSystemoutputDto = new StarSystemoutputDto
+                {
+                    Rates = averageRatsList,
+                    MinimumStars = minimumStars,
+                };
+
+                return new ApiResponse<StarSystemoutputDto>(true, (int)ResponseCodeEnum.Success, "Minimum Stars Retrieved Successfully", starSystemoutputDto);
+
+            }
+            catch (Exception)
+            {
+                return new ApiResponse<StarSystemoutputDto>(false, (int)ResponseCodeEnum.InternalServerError, "An Error Occurred While Getting Minimum Stars", null);
+            }
+        }
+
+        // Private Functions
+        private static decimal? CalculateAverageRating(List<Rate> rates, int movieId)
         {
             var ratings = rates.Where(r => r.MovieId == movieId).Select(r => r.Value);
             return ratings.Any() ? (decimal?)ratings.Average() : null;
@@ -365,7 +488,7 @@ namespace Rihal_Cinema.Services
             return truncated;
         }
 
-        private string NumberToText(int number)
+        private static string NumberToText(int number)
         {
             string[] thousands = { "", "thousand", "million", "billion", "trillion" };
 
@@ -388,7 +511,7 @@ namespace Rihal_Cinema.Services
             return result.Trim();
         }
 
-        private string NumberToTextHelper(int number)
+        private static string NumberToTextHelper(int number)
         {
 
             string[] units = { "", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine" };
@@ -421,7 +544,7 @@ namespace Rihal_Cinema.Services
             return result;
         }
 
-        private bool MatchScrambledNameWithActualName(string scrambledName, string movieName)
+        private static bool MatchScrambledNameWithActualName(string scrambledName, string movieName)
         {
             // Remove spaces from scrambledName and movieName
             scrambledName = RemoveSpaces(scrambledName);
@@ -436,7 +559,7 @@ namespace Rihal_Cinema.Services
             return new string(scrambledNameChars) == new string(movieNameChars);
         }
 
-        private string RemoveSpaces(string str)
+        private static string RemoveSpaces(string str)
         {
             // Split the string into words
             string[] words = str.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);

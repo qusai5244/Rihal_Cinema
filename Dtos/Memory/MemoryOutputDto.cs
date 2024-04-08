@@ -1,4 +1,6 @@
-﻿namespace Rihal_Cinema.Dtos.Memory
+﻿using Rihal_Cinema.Dtos.Photo;
+
+namespace Rihal_Cinema.Dtos.Memory
 {
     public class MemoryOutputDto
     {
@@ -7,5 +9,6 @@
         public string MovieName { get; set; }
         public string Title { get; set; }
         public string Story { get; set; }
+        public List<PhotoListOutputDto> Photos { get; set; }
     }
 }

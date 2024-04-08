@@ -1,4 +1,5 @@
-﻿using Rihal_Cinema.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using Rihal_Cinema.Data;
 using Rihal_Cinema.Dtos.User;
 using Rihal_Cinema.Enums;
 using Rihal_Cinema.Helpers;
@@ -23,6 +24,17 @@ namespace Rihal_Cinema.Services
         {
             try
             {
+                var emailExist = await _dataContext
+                                       .Users
+                                       .AsNoTracking()
+                                       .Where(u => u.Email == input.Email)
+                                       .AnyAsync();
+
+                if (emailExist)
+                {
+                    return new ApiResponse<string>(false, (int)ResponseCodeEnum.Success, "Email Already Exist", null);
+                }
+
                 // Encode password to byte array
                 byte[] encodedPassword = Encoding.UTF8.GetBytes(input.Password);
 
@@ -41,7 +53,7 @@ namespace Rihal_Cinema.Services
 
                 return new ApiResponse<string>(true, (int)ResponseCodeEnum.Success, "New User Created", null);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Handle error
                 return new ApiResponse<string>(false, (int)ResponseCodeEnum.InternalServerError, "Error Occurred while creating new User", null);

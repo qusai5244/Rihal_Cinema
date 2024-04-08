@@ -10,6 +10,7 @@
         public List<String> MainCasts { get; set; }
         public string Director { get; set; }
         public string Budget { get; set; }
-
+        public int? MyRate { get; set; }
+        public double? AverageRating { get; set; }
     }
 }
