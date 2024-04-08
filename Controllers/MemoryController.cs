@@ -107,5 +107,13 @@ namespace Rihal_Cinema.Controllers
 
             return Ok(response);
         }
+
+        [HttpGet("GetUrlLinks/{id}")]
+        public async Task<IActionResult> GetUrlLinksFromMemory([FromRoute] int id)
+        {
+            var response = await _memoryService.ExtractLinksFromMemoryStory(id);
+
+            return Ok(response);
+        }
     }
 }

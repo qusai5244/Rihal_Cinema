@@ -18,6 +18,7 @@ using System.Xml.Linq;
 using Minio.Exceptions;
 using Rihal_Cinema.Infrastructure.ServiceContext;
 using System;
+using System.Text.RegularExpressions;
 
 namespace Rihal_Cinema.Services
 {
@@ -407,7 +408,32 @@ namespace Rihal_Cinema.Services
                 return new ApiResponse<string>(false, (int)ResponseCodeEnum.InternalServerError, "An Error occurred While Uploading The Photo", null);
             }
         }
+        public async Task<ApiResponse<List<string>>> ExtractLinksFromMemoryStory(int memoryId)
+        {
+            try
+            {
+                var memory = await _dataContext
+                                    .Memories
+                                    .AsNoTracking()
+                                    .Where(m => m.Id == memoryId)
+                                    .Select(m => m.Story)
+                                    .FirstOrDefaultAsync();
 
+                if (memory == null)
+                {
+                    return new ApiResponse<List<string>>(false, (int)ResponseCodeEnum.NotFound, "Memory Not Found", null);
+                }
+
+                // Extract links from the memory story using regular expressions
+                var links = ExtractLinks(memory);
+
+                return new ApiResponse<List<string>>(true, (int)ResponseCodeEnum.Success, "Links extracted successfully", links);
+            }
+            catch (Exception)
+            {
+                return new ApiResponse<List<string>>(false, (int)ResponseCodeEnum.InternalServerError, "An Error Occurred While Extracting Links From Memory Story", null);
+            }
+        }
 
         // Private Functions
         private static async Task<PhotoUploadOutputDto> UploadImgToCloud(IFormFile image)
@@ -540,7 +566,24 @@ namespace Rihal_Cinema.Services
                     return "jpg"; // default to jpg if content type is not recognized
             }
         }
+        private static List<string> ExtractLinks(string text)
+        {
+            var links = new List<string>();
 
+            // Regular expression to find URLs in the text
+            var regex = new Regex(@"\b(?:https?://|www\.)\S+\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+            // Find matches
+            var matches = regex.Matches(text);
+
+            // Add matches to the list
+            foreach (Match match in matches)
+            {
+                links.Add(match.Value);
+            }
+
+            return links;
+        }
     }
 }
 

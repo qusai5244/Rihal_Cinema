@@ -12,6 +12,7 @@ namespace Rihal_Cinema.Services.Interfaces
         Task<ApiResponse<MemoriesOutputDto>> CreateMemory(MemoryInputDto input);
         Task<ApiResponse<MemoryOutputDto>> DeleteMemory(int memoryId);
         Task<ApiResponse<string>> DeleteMemoryPhoto(int photoId);
+        Task<ApiResponse<List<string>>> ExtractLinksFromMemoryStory(int memoryId);
         Task<byte[]> GetImage(int imageId);
         Task<ApiResponse<PaginatedList<MemoriesOutputDto>>> GetMemories(PaginationInputDto input);
         Task<ApiResponse<MemoryOutputDto>> GetMemory(int memoryId);
