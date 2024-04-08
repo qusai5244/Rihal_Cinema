@@ -12,6 +12,7 @@ namespace Rihal_Cinema.Models
         public string Title { get; set; }
         [MaxLength(5000)]
         public string Story { get; set; }
+        public DateTime TakenOn { get; set; }
         public ICollection<Photo> Photos { get; set; }
 
     }

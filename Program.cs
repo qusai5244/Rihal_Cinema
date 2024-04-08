@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Minio;
 using Rihal_Cinema.Data;
 using Rihal_Cinema.Handler;
 using Rihal_Cinema.Helpers;
@@ -15,12 +16,14 @@ builder.Services.AddHttpClient();
 builder.Services.AddScoped<ICallRihalApiService, CallRihalApiService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IMovieService, MovieService>();
+builder.Services.AddScoped<IMemoryService, MemoryService>();
 
 
 builder.Services.AddDbContext<DataContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
 
 // Add services to the container.
 
@@ -87,7 +90,7 @@ app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
-app.UseAuthentication(); // Add this line
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

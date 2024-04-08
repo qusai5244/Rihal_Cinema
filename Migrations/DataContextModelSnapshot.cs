@@ -67,6 +67,9 @@ namespace Rihal_Cinema.Migrations
                         .HasMaxLength(5000)
                         .HasColumnType("character varying(5000)");
 
+                    b.Property<DateTime>("TakenOn")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Title")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
@@ -143,6 +146,9 @@ namespace Rihal_Cinema.Migrations
                     b.Property<decimal>("Size")
                         .HasColumnType("numeric");
 
+                    b.Property<string>("StoredName")
+                        .HasColumnType("text");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -201,7 +207,7 @@ namespace Rihal_Cinema.Migrations
                         .HasColumnType("character varying(50)");
 
                     b.Property<byte[]>("Password")
-                        .HasMaxLength(20)
+                        .HasMaxLength(50)
                         .HasColumnType("bytea");
 
                     b.Property<DateTime?>("UpdatedAt")
