@@ -427,6 +427,11 @@ namespace Rihal_Cinema.Services
                 // Extract links from the memory story using regular expressions
                 var links = ExtractLinks(memory);
 
+                if (!links.Any())
+                {
+                    return new ApiResponse<List<string>>(true, (int)ResponseCodeEnum.NotFound, "No Urls Links Found In this Memory", null);
+                }
+
                 return new ApiResponse<List<string>>(true, (int)ResponseCodeEnum.Success, "Links extracted successfully", links);
             }
             catch (Exception)

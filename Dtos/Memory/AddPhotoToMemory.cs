@@ -5,6 +5,7 @@ namespace Rihal_Cinema.Dtos.Memory
     public class AddPhotoToMemory
     {
 
+        [Required]
         [AllowedExtensions(new string[] { ".jpg", ".jpeg", ".png", ".gif" })]
         public IFormFile Image { get; set; }
     }
