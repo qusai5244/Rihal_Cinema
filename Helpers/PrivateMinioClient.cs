@@ -10,7 +10,8 @@
 
         public PrivateMinioClient()
         {
-            _endpoint = "localhost:9000";
+            //_endpoint = "localhost:9000";
+            _endpoint = "minio:9000";
             _accessKey = "ROOTUSER";
             _secretKey = "CHANGEME123";
         }
